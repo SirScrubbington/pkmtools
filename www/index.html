@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	
+		<!-- Stylesheet Source -->
+		<link rel= "stylesheet" type = "text/css" href= "https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+		<link rel= "stylesheet" type = "text/css" href= "index.css">
+		
+		<!-- Javascript Source -->
+		
+		<script
+			src="https://code.jquery.com/jquery-3.3.1.js"
+			integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+			crossorigin="anonymous">
+		</script>
+		
+		<script src= "index.js"></script>
+		<script src= "pokedex.js"></script>
+		<script src= "math.js"></script>
+		<script src= "autofill.js"></script>
+		
+		<script type = "text/javascript">
+			window.addEventListener("load",function()
+			{
+
+				let names = [];
+				let indexes = [];
+					
+				for (pokemon in BattlePokedex)
+				{
+					names.push(BattlePokedex[pokemon].species);
+					indexes.push(pokemon);
+				}
+
+				autocomplete(document.getElementById("input"), names, indexes);
+				
+				loadPokemonData('buzzwole');
+				setLevelData(50);
+			});
+		</script>
+		
+		<title> Pokemon EV Spread Optimiser </title>
+	</head>
+	<body>
+		<h1> Pokemon EV Spread Optimiser </h1>
+		<h2> Made by <a href= "https://twitter.com/SirScrubbington"> @SirScrubbington </a> </h2>
+		<div id = "form">
+			<form autocomplete = "off">	
+				<div class = "autocomplete" style = "width:300px;">
+					<input id = "input" type = "text" name = "search" placeholder= "Pokemon">
+				</div>
+			</form>
+		</div>
+		<div id="selecteddiv"><!-- Contains auto-generated message listing active Pokemon --></div>
+		<div id = "levelform">
+			<form autocomplete = "off">
+				<div class = "levelselect" style = "width:50px;">
+					<input id="level" type="number" name="level" placeholder = "Level" min="1" max="100">
+					<button type="button" onClick="setLevelData();"> Update </button>
+				</div>
+			</form>
+		</div>
+		<div id="leveldiv"><!-- Contains auto-generated message listing active level --></div>
+		<div id = "restrict">
+			<form autocomplete = "off">
+				<table class="table">
+					<tr>
+						<th scope="col"> Field </th>
+						<th scope="col"> HP </th>
+						<th scope="col"> Atk </th>
+						<th scope="col"> Def </th>
+						<th scope="col"> SpA </th>
+						<th scope="col"> SpD </th>
+						<th scope="col"> Spe </th>
+					</tr>
+					<tr>
+						<th> Base </th>
+						<td><input type = "text" name = "hpBase" id = "hpBase" value = "" class = "bstat" readonly></td>
+						<td><input type = "text" name = "atkBase" id = "atkBase" value = "" class = "bstat" readonly></td>
+						<td><input type = "text" name = "defBase" id = "defBase" value = "" class = "bstat" readonly></td>
+						<td><input type = "text" name = "spaBase" id = "spaBase" value = "" class = "bstat" readonly></td>
+						<td><input type = "text" name = "spdBase" id = "spdBase" value = "" class = "bstat" readonly></td>
+						<td><input type = "text" name = "speBase" id = "speBase" value = "" class = "bstat" readonly></td>
+					</tr>
+					<tr>
+						<th scope="col"> Nature </th>
+						<td scope="col">
+							<input type="hidden" id="hpDefault">
+						</td>
+						<td scope="col">
+							<select id = "atkSelect" onChange = "updateNature('atk')">
+								<option class="boosting" value="boosting"> Boosting (1.1x) </option>
+								<option class="neutral" id="atkDefault" value="neutral" selected="selected"> Neutral (1.0x) </option>
+								<option class="hindering" value="hindering"> Hindering (0.9x) </option>
+							</select>
+						</td>
+						<td scope="col">
+							<select id="defSelect" onChange = "updateNature('def')">
+								<option class="boosting"  value="boosting"> Boosting (1.1x) </option>
+								<option class="neutral"  id="defDefault" value="neutral" selected="selected"> Neutral (1.0x) </option>
+								<option class="hindering"  value="hindering"> Hindering (0.9x) </option>
+							</select>
+						</td>
+						<td scope="col">
+							<select id="spaSelect" onChange = "updateNature('spa')">
+								<option class="boosting"  value="boosting"> Boosting (1.1x) </option>
+								<option class="neutral"  id="spaDefault" value="neutral" selected="selected"> Neutral (1.0x) </option>
+								<option class="hindering"  value="hindering"> Hindering (0.9x) </option>
+							</select>
+						</td>
+						<td scope="col" >
+							<select  id="spdSelect" onChange = "updateNature('spd')">
+								<option class="boosting"  value="boosting"> Boosting (1.1x) </option>
+								<option class="neutral"  id="spdDefault" value="neutral" selected="selected"> Neutral (1.0x) </option>
+								<option class="hindering" value="hindering"> Hindering (0.9x) </option>
+							</select>
+						</td>
+						<td scope="col">
+							<select id="speSelect" onChange = "updateNature('spe')">
+								<option class="boosting"  value="boosting"> Boosting (1.1x) </option>
+								<option class="neutral"  id="speDefault" value="neutral" selected="selected"> Neutral (1.0x) </option>
+								<option class="hindering" value="hindering"> Hindering (0.9x) </option>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"> Best </th>
+						<td><input type = "text" name = "hpTop" id = "hpTop" value = "" class = "bstat" readonly></br></td>
+						<td><input type = "text" name = "atkTop" id = "atkTop" value = "" class = "hstat" readonly></br></td>
+						<td><input type = "text" name = "defTop" id = "defTop" value = "" class = "hstat" readonly></br></td>
+						<td><input type = "text" name = "spaTop" id = "spaTop" value = "" class = "hstat" readonly></br></td>
+						<td><input type = "text" name = "spdTop" id = "spdTop" value = "" class = "hstat" readonly></br></td>
+						<td><input type = "text" name = "speTop" id = "speTop" value = "" class = "hstat" readonly></br></td>
+					</tr>
+					<tr>
+						<th scope="row"> Neutral </th>
+						<td><input type = "text" name = "hpMed" id = "hpMed" value = "" class = "mstat" readonly></br></td>
+						<td><input type = "text" name = "atkMed" id = "atkMed" value = "" class = "mstat" readonly></br></td>
+						<td><input type = "text" name = "defMed" id = "defMed" value = "" class = "mstat" readonly></br></td>
+						<td><input type = "text" name = "spaMed" id = "spaMed" value = "" class = "mstat" readonly></br></td>
+						<td><input type = "text" name = "spdMed" id = "spdMed" value = "" class = "mstat" readonly></br></td>
+						<td><input type = "text" name = "speMed" id = "speMed" value = "" class = "mstat" readonly></br></td>
+					</tr>
+					<tr>
+						<th scope="row"> Worst </th>
+						<td><input type = "text" name = "hpBot" id = "hpBot" value = "" class = "lstat" readonly></br></td>
+						<td><input type = "text" name = "atkBot" id = "atkBot" value = "" class = "lstat" readonly></br></td>
+						<td><input type = "text" name = "defBot" id = "defBot" value = "" class = "lstat" readonly></br></td>
+						<td><input type = "text" name = "spaBot" id = "spaBot" value = "" class = "lstat" readonly></br></td>
+						<td><input type = "text" name = "spdBot" id = "spdBot" value = "" class = "lstat" readonly></br></td>
+						<td><input type = "text" name = "speBot" id = "speBot" value = "" class = "lstat" readonly></br></td>
+					</tr>
+					<tr>
+						<th scope="col"> Constraints </th>
+					</tr>
+					<tr>
+						<th scope="row"> Maximum </th>
+						<td>
+							<input onkeyup="getRequiredEVs('hp')" type = "text" name = "hpMax" id = "hpMax" value = "" class = "sstat"></br>
+							<div class = "minmaxlbl"  id="hpMaxLbl"></div>
+						</td>
+						<td>
+							<input onkeyup="getRequiredEVs('atk')" type = "text" name = "atkMax" id = "atkMax" value = "" class = "sstat"></br>
+							<div class = "minmaxlbl"  id="atkMaxLbl"></div>
+						</td>
+						<td>
+							<input onkeyup="getRequiredEVs('def')" type = "text" name = "defMax" id = "defMax" value = "" class = "sstat"></br>
+							<div class = "minmaxlbl"  id="defMaxLbl"></div>
+						</td>
+						<td>
+							<input onkeyup="getRequiredEVs('spa')" type = "text" name = "spaMax" id = "spaMax" value = "" class = "sstat"></br>
+							<div class = "minmaxlbl"  id="spaMaxLbl"></div>
+						</td>
+						<td>
+							<input onkeyup="getRequiredEVs('spd')" type = "text" name = "spdMax" id = "spdMax" value = "" class = "sstat"></br>
+							<div class = "minmaxlbl"  id="spdMaxLbl"></div>
+						</td>
+						<td>
+							<input  onkeyup="getRequiredEVs('spe')" type = "text" name = "speMax" id = "speMax" value = "" class = "sstat"></br>
+							<div class = "minmaxlbl"  id="speMaxLbl"></div>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"> Minimum </th>
+						<td>
+							<input onkeyup="getRequiredEVs('hp')" type = "text" name = "hpMin" id = "hpMin" value = "" class = "sstat"></br>
+							<div class = "minmaxlbl" id="hpMinLbl"></div>
+						</td>
+						<td>
+							<input onkeyup="getRequiredEVs('atk')" type = "text" name = "atkMin" id = "atkMin" value = "" class = "sstat"></br>
+							<div class = "minmaxlbl"  id="atkMinLbl"></div>
+						</td>
+						<td>
+							<input onkeyup="getRequiredEVs('def')" type = "text" name = "defMin" id = "defMin" value = "" class = "sstat"></br>
+							<div class = "minmaxlbl"  id="defMinLbl"></div>
+						</td>
+						<td>
+							<input onkeyup="getRequiredEVs('spa')" type = "text" name = "spaMin" id = "spaMin" value = "" class = "sstat"></br>
+							<div class = "minmaxlbl"  id="spaMinLbl"></div>
+						</td>
+						<td>
+							<input onkeyup="getRequiredEVs('spd')" type = "text" name = "spdMin" id = "spdMin" value = "" class = "sstat"></br>
+							<div class = "minmaxlbl"  id="spdMinLbl"></div>
+						</td>
+						<td>
+							<input onkeyup="getRequiredEVs('spe')" type = "text" name = "speMin" id = "speMin" value = "" class = "sstat"></br>
+							<div class = "minmaxlbl"  id="speMinLbl"></div>
+						</td>
+					</tr>
+				</table>
+			</form>
+		</div>
+	</body>
+</html>
